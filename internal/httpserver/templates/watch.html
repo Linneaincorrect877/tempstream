@@ -139,6 +139,7 @@
       const playlistUrl = "{{ .PlaylistURL | js }}";
 
       let statusProbeTimer = null;
+      let streamWasOffline = false;
 
       const tryPlay = () => {
         video.play().catch(() => {});
@@ -178,6 +179,7 @@
           }
 
           if (response.status === 404) {
+            streamWasOffline = true;
             showError(
               "The stream is offline right now. Keep this page open " +
                 "or refresh when the stream starts.",
@@ -186,6 +188,11 @@
           }
 
           if (response.ok) {
+            if (streamWasOffline) {
+              window.location.reload();
+              return;
+            }
+
             clearError();
           }
         } catch {
