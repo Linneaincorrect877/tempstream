@@ -85,21 +85,21 @@ Caddy is the public entry point and reverse-proxies incoming HTTP traffic to the
 
 ## Environment variables
 
-| Name                        | Required        | Default       | Description                                                                                                             |
-| --------------------------- | --------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `HTTP_ADDR`                 | No              | `:8080`       | HTTP listen address for the Go service.                                                                                 |
-| `BASE_URL`                  | Yes             | –             | Public base URL used in generated watch links.                                                                          |
-| `DB_PATH`                   | No              | `./db.sqlite` | SQLite database path. In Docker Compose, `/data/db.sqlite` is typically used.                                           |
-| `TELEGRAM_BOT_TOKEN`        | Yes             | –             | Telegram bot token.                                                                                                     |
-| `ALLOWED_CHAT_IDS`          | Yes             | –             | Comma-separated list of Telegram chat IDs allowed to control the bot.                                                   |
-| `MEDIAMTX_HLS_BASE_URL`     | Yes             | –             | Internal HLS base URL used by the Go service to probe stream health and proxy playback.                                 |
-| `COOKIE_SECURE`             | No              | `true`        | Whether the playback cookie is marked `Secure`. Use `false` for plain local HTTP.                                       |
-| `DEFAULT_LINK_TTL`          | No              | `1h`          | Default TTL used when a link is created with a zero duration internally.                                                |
-| `LINK_TTL_OPTIONS`          | No              | `30m,1h,3h`   | Comma-separated list of temporary link durations shown in the Telegram bot. If empty, only permanent links are offered. |
-| `TIME_ZONE`                 | No              | `UTC`         | IANA time zone used in bot responses, for example `UTC`, `Europe/Berlin`, or `Asia/Omsk`.                               |
-| `LOG_LEVEL`                 | No              | `info`        | Log level for the Go service.                                                                                           |
-| `MEDIAMTX_PUBLISH_USER`     | Yes for Compose | –             | Username required for RTMP publishing to MediaMTX.                                                                      |
-| `MEDIAMTX_PUBLISH_PASSWORD` | Yes for Compose | –             | Password required for RTMP publishing to MediaMTX.                                                                      |
+| Name                        | Required              | Default       | Description                                                                                                             |
+| --------------------------- | --------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `HTTP_ADDR`                 | No                    | `:8080`       | HTTP listen address for the Go service.                                                                                 |
+| `BASE_URL`                  | Yes                   | –             | Public base URL used in generated watch links.                                                                          |
+| `DB_PATH`                   | No                    | `./db.sqlite` | SQLite database path. In Docker Compose, `/data/db.sqlite` is typically used.                                           |
+| `TELEGRAM_BOT_TOKEN`        | Yes                   | –             | Telegram bot token.                                                                                                     |
+| `ALLOWED_CHAT_IDS`          | Yes                   | –             | Comma-separated list of Telegram chat IDs allowed to control the bot.                                                   |
+| `MEDIAMTX_HLS_BASE_URL`     | Yes                   | –             | Internal HLS base URL used by the Go service to probe stream health and proxy playback.                                 |
+| `COOKIE_SECURE`             | No                    | `true`        | Whether the playback cookie is marked `Secure`. Use `false` for plain local HTTP.                                       |
+| `DEFAULT_LINK_TTL`          | No                    | `1h`          | Default TTL used when a link is created with a zero duration internally.                                                |
+| `LINK_TTL_OPTIONS`          | No                    | `30m,1h,3h`   | Comma-separated list of temporary link durations shown in the Telegram bot. If empty, only permanent links are offered. |
+| `TIME_ZONE`                 | No                    | `UTC`         | IANA time zone used in bot responses, for example `UTC`, `Europe/Berlin`, or `Asia/Omsk`.                               |
+| `LOG_LEVEL`                 | No                    | `info`        | Log level for the Go service.                                                                                           |
+| `MEDIAMTX_PUBLISH_USER`     | Yes in Docker Compose | –             | Username required for RTMP publishing to MediaMTX.                                                                      |
+| `MEDIAMTX_PUBLISH_PASSWORD` | Yes in Docker Compose | –             | Password required for RTMP publishing to MediaMTX.                                                                      |
 
 See [.env.example](./.env.example) for a complete example.
 
@@ -141,7 +141,7 @@ After startup:
 - MediaMTX listens for RTMP on `:1935`
 - MediaMTX serves HLS on `:8888`
 
-### Go only
+### Without Docker
 
 To run only the Go service:
 
