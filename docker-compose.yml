@@ -57,6 +57,8 @@ services:
         condition: service_healthy
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
     ports:
       - "80:80"
       - "443:443"
@@ -69,3 +71,5 @@ services:
 
 volumes:
   tempstream_data:
+  caddy_data:
+  caddy_config:
