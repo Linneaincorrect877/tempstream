@@ -32,4 +32,5 @@ COPY --from=builder --chown=app:app /dist/tempstream /app/tempstream
 
 WORKDIR /app
 USER app
+EXPOSE 8080
 ENTRYPOINT ["/app/tempstream"]
